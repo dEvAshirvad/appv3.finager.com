@@ -231,7 +231,7 @@ export function useSocialSignInGoogle() {
 
 export function useEmailSignUp() {
 	const queryClient = useQueryClient();
-
+	const router = useRouter();
 	return useMutation({
 		mutationFn: emailSignUp,
 		onSuccess: () => {
@@ -240,6 +240,7 @@ export function useEmailSignUp() {
 				description: "Please check your email to verify your account.",
 			});
 			queryClient.invalidateQueries({ queryKey: sessionKeys.all });
+			router.push("/onboarding");
 		},
 		onError: (error: unknown) => {
 			if (error instanceof Error) {
