@@ -1,6 +1,7 @@
 "use client";
 
 import DashHeader from "@/components/header/dash-header";
+import { Authenticated } from "@/components/providers/auth-provider";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,13 +37,15 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 	// Only render content if user is onboarded
 	return (
-		<SidebarProvider>
-			<AppSidebar />
-			<SidebarInset>
-				<DashHeader />
-				{children}
-			</SidebarInset>
-		</SidebarProvider>
+		<Authenticated>
+			<SidebarProvider>
+				<AppSidebar />
+				<SidebarInset>
+					<DashHeader />
+					{children}
+				</SidebarInset>
+			</SidebarProvider>
+		</Authenticated>
 	);
 }
 

@@ -39,7 +39,7 @@ export function Authenticated({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		if (!isLoading && !data?.session && isFetched) {
 			toast.error("You are not authenticated");
-			router.push("/signin");
+			router.push("/auth/signin");
 		}
 	}, [isLoading, data?.session, router, isFetched]);
 

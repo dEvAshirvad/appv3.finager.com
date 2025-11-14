@@ -38,80 +38,76 @@ const data = {
 			url: "/dashboard",
 			icon: Home,
 		},
-		{
-			title: "Items",
-			url: "/items",
-			icon: Package,
-		},
-		{
-			title: "Sales",
-			url: "/sales/customers",
-			icon: IndianRupee,
-			isActive: true,
-			items: [
-				{
-					title: "Customers",
-					url: "/sales/customers",
-				},
-				{
-					title: "Invoices",
-					url: "/sales/invoices",
-				},
-				{
-					title: "Payments Received",
-					url: "/sales/payments-received",
-				},
-			],
-		},
-		{
-			title: "Purchases",
-			url: "/purchases/suppliers",
-			icon: ShoppingCart,
-			items: [
-				{
-					title: "Suppliers",
-					url: "/purchases/suppliers",
-				},
-				{
-					title: "Expenses",
-					url: "/purchases/expenses",
-				},
-				{
-					title: "Bills",
-					url: "/purchases/expenses",
-				},
-			],
-		},
-		{
-			title: "Accountant",
-			url: "/accountant/manual-journal",
-			icon: Calculator,
-			items: [
-				{
-					title: "Manual Journal",
-					url: "/accountant/manual-journal",
-				},
-				{
-					title: "Chart of Accounts",
-					url: "/accountant/chart-of-accounts",
-				},
-			],
-		},
-		{
-			title: "Reports",
-			url: "/reports",
-			icon: BarChart,
-			items: [
-				{
-					title: "Profit and Loss",
-					url: "/reports/profit-and-loss",
-				},
-				{
-					title: "Balance Sheet",
-					url: "/reports/balance-sheet",
-				},
-			],
-		},
+		// {
+		// 	title: "Items",
+		// 	url: "/items",
+		// 	icon: Package,
+		// },
+		// {
+		// 	title: "Sales",
+		// 	url: "/sales/customers",
+		// 	icon: IndianRupee,
+		// 	isActive: true,
+		// 	items: [
+		// 		{
+		// 			title: "Customers",
+		// 			url: "/sales/customers",
+		// 		},
+		// 		{
+		// 			title: "Invoices",
+		// 			url: "/sales/invoices",
+		// 		},
+		// 		{
+		// 			title: "Payments Received",
+		// 			url: "/sales/payments-received",
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	title: "Purchases",
+		// 	url: "/purchases/suppliers",
+		// 	icon: ShoppingCart,
+		// 	items: [
+		// 		{
+		// 			title: "Suppliers",
+		// 			url: "/purchases/suppliers",
+		// 		},
+		// 		{
+		// 			title: "Expenses",
+		// 			url: "/purchases/expenses",
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	title: "Accountant",
+		// 	url: "/accountant/manual-journal",
+		// 	icon: Calculator,
+		// 	items: [
+		// 		{
+		// 			title: "Manual Journal",
+		// 			url: "/accountant/manual-journal",
+		// 		},
+		// 		{
+		// 			title: "Chart of Accounts",
+		// 			url: "/accountant/chart-of-accounts",
+		// 		},
+		// 	],
+		// },
+		// {
+		// 	title: "Reports",
+		// 	url: "/reports",
+		// 	icon: BarChart,
+		// 	items: [
+		// 		{
+		// 			title: "Profit and Loss",
+		// 			url: "/reports/profit-and-loss",
+		// 		},
+		// 		{
+		// 			title: "Balance Sheet",
+		// 			url: "/reports/balance-sheet",
+		// 		},
+		// 	],
+		// },
 	],
 	navSecondary: [
 		{

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -10,6 +13,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	Calculator,
 	Shield,
@@ -29,6 +40,38 @@ import {
 import Link from "next/link";
 
 export default function LandingPage() {
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [formData, setFormData] = useState({
+		firstName: "",
+		lastName: "",
+		email: "",
+		company: "",
+		message: "",
+	});
+
+	const handleInputChange = (
+		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+	) => {
+		const { name, value } = e.target;
+		setFormData((prev) => ({
+			...prev,
+			[name]: value,
+		}));
+	};
+
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		// Open dialog on form submission
+		setIsDialogOpen(true);
+		// Optionally reset form
+		setFormData({
+			firstName: "",
+			lastName: "",
+			email: "",
+			company: "",
+			message: "",
+		});
+	};
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
 			{/* Navigation */}
@@ -45,11 +88,6 @@ export default function LandingPage() {
 								href="#features"
 								className="text-gray-600 hover:text-primary transition-colors">
 								Features
-							</Link>
-							<Link
-								href="#pricing"
-								className="text-gray-600 hover:text-primary transition-colors">
-								Pricing
 							</Link>
 							<Link
 								href="#testimonials"
@@ -391,132 +429,6 @@ export default function LandingPage() {
 				</div>
 			</section>
 
-			{/* Pricing Section */}
-			<section
-				id="pricing"
-				className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-					<div className="text-center mb-16">
-						<h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-							Simple, Transparent Pricing
-						</h2>
-						<p className="text-xl text-gray-600">
-							Choose the plan that fits your business needs
-						</p>
-					</div>
-
-					<div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-						<Card className="border-0 shadow-lg">
-							<CardHeader className="text-center">
-								<CardTitle className="text-xl">Starter</CardTitle>
-								<div className="text-3xl font-bold text-gray-900 mt-4">
-									₹2,999<span className="text-lg text-gray-500">/month</span>
-								</div>
-								<CardDescription>Perfect for small businesses</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<ul className="space-y-3">
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Up to 5 clients
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Basic GST reconciliation
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Standard reports
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Email support
-									</li>
-								</ul>
-								<Button className="w-full mt-6" variant="outline">
-									Start Free Trial
-								</Button>
-							</CardContent>
-						</Card>
-
-						<Card className="border-2 border-primary shadow-xl relative">
-							<div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-								<Badge className="bg-primary text-white">Most Popular</Badge>
-							</div>
-							<CardHeader className="text-center">
-								<CardTitle className="text-xl">Professional</CardTitle>
-								<div className="text-3xl font-bold text-gray-900 mt-4">
-									₹7,999<span className="text-lg text-gray-500">/month</span>
-								</div>
-								<CardDescription>For growing CA practices</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<ul className="space-y-3">
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Up to 25 clients
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Advanced GST reconciliation
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Dynamic ledger templates
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Priority support
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										API access
-									</li>
-								</ul>
-								<Button className="w-full mt-6">Start Free Trial</Button>
-							</CardContent>
-						</Card>
-
-						<Card className="border-0 shadow-lg">
-							<CardHeader className="text-center">
-								<CardTitle className="text-xl">Enterprise</CardTitle>
-								<div className="text-3xl font-bold text-gray-900 mt-4">
-									Custom<span className="text-lg text-gray-500">/month</span>
-								</div>
-								<CardDescription>For large CA firms</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<ul className="space-y-3">
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Unlimited clients
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										White-label solution
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Custom integrations
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										Dedicated support
-									</li>
-									<li className="flex items-center">
-										<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-										On-premise deployment
-									</li>
-								</ul>
-								<Button className="w-full mt-6" variant="outline">
-									Contact Sales
-								</Button>
-							</CardContent>
-						</Card>
-					</div>
-				</div>
-			</section>
-
 			{/* Contact Section */}
 			<section id="contact" className="py-20 bg-white">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -534,43 +446,71 @@ export default function LandingPage() {
 							<h3 className="text-2xl font-semibold text-gray-900 mb-6">
 								Get Started Today
 							</h3>
-							<form className="space-y-6">
+							<form onSubmit={handleSubmit} className="space-y-6">
 								<div className="grid md:grid-cols-2 gap-4">
 									<div>
 										<label className="block text-sm font-medium text-gray-700 mb-2">
 											First Name
 										</label>
-										<Input placeholder="Enter your first name" />
+										<Input
+											name="firstName"
+											value={formData.firstName}
+											onChange={handleInputChange}
+											placeholder="Enter your first name"
+											required
+										/>
 									</div>
 									<div>
 										<label className="block text-sm font-medium text-gray-700 mb-2">
 											Last Name
 										</label>
-										<Input placeholder="Enter your last name" />
+										<Input
+											name="lastName"
+											value={formData.lastName}
+											onChange={handleInputChange}
+											placeholder="Enter your last name"
+											required
+										/>
 									</div>
 								</div>
 								<div>
 									<label className="block text-sm font-medium text-gray-700 mb-2">
 										Email
 									</label>
-									<Input type="email" placeholder="Enter your email" />
+									<Input
+										type="email"
+										name="email"
+										value={formData.email}
+										onChange={handleInputChange}
+										placeholder="Enter your email"
+										required
+									/>
 								</div>
 								<div>
 									<label className="block text-sm font-medium text-gray-700 mb-2">
 										Company
 									</label>
-									<Input placeholder="Enter your company name" />
+									<Input
+										name="company"
+										value={formData.company}
+										onChange={handleInputChange}
+										placeholder="Enter your company name"
+									/>
 								</div>
 								<div>
 									<label className="block text-sm font-medium text-gray-700 mb-2">
 										Message
 									</label>
 									<Textarea
+										name="message"
+										value={formData.message}
+										onChange={handleInputChange}
 										placeholder="Tell us about your accounting needs"
 										className="resize-none h-24"
+										required
 									/>
 								</div>
-								<Button className="w-full" size="lg">
+								<Button type="submit" className="w-full" size="lg">
 									Send Message
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</Button>
@@ -579,6 +519,26 @@ export default function LandingPage() {
 					</div>
 				</div>
 			</section>
+
+			{/* Success Dialog */}
+			<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Thank You for Your Interest!</DialogTitle>
+						<DialogDescription>
+							We&apos;ve received your request and our team will get back to you
+							shortly. We look forward to helping you transform your accounting
+							workflow.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+						<Link href="/auth/signin">
+							<Button>Sign In</Button>
+						</Link>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			{/* Footer */}
 			<footer className="bg-gray-900 text-white py-12">
