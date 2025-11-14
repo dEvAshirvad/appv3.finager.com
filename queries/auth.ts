@@ -118,7 +118,7 @@ async function fetchSession(): Promise<SessionResponse> {
 async function socialSignInGoogle() {
 	const response = await api.post("/auth/sign-in/social", {
 		provider: "google",
-		callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND}`,
+		callbackURL: `${process.env.NEXT_PUBLIC_FRONTEND}/dashboard`,
 		newUserCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND}/onboarding`,
 		errorCallbackURL: `${process.env.NEXT_PUBLIC_FRONTEND}/error`,
 	});
