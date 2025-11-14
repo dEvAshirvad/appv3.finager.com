@@ -142,7 +142,7 @@ function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
 			</div>
 			<div className="text-sm">
 				Already have an account?{" "}
-				<Link href="/signin" className="underline underline-offset-4">
+				<Link href="/auth/signin" className="underline underline-offset-4">
 					Sign in
 				</Link>
 			</div>

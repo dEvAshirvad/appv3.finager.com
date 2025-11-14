@@ -20,6 +20,8 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 // import { useEmailSignIn, useSocialSignInGoogle } from "@/queries/auth";
 import { redirect } from "next/navigation";
+import { useEmailSignIn, useSocialSignInGoogle } from "@/queries/auth";
+import { toast } from "sonner";
 
 const formSchema = z.object({
 	email: z.string().email(),
@@ -27,9 +29,9 @@ const formSchema = z.object({
 });
 
 function SigninForm({ className, ...props }: React.ComponentProps<"form">) {
-	// const { isPending } = useEmailSignIn();
-	// const { mutate: socialSignIn, isPending: isSocialSignInPending } =
-	// 	useSocialSignInGoogle();
+	const { mutate: signIn, isPending } = useEmailSignIn();
+	const { mutate: socialSignIn, isPending: isSocialSignInPending } =
+		useSocialSignInGoogle();
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -38,14 +40,13 @@ function SigninForm({ className, ...props }: React.ComponentProps<"form">) {
 		},
 	});
 
-	function onSubmit(values: z.infer<typeof formSchema>) {
+	async function onSubmit(values: z.infer<typeof formSchema>) {
 		console.log(values);
-		redirect("/dashboard");
-		// signIn({
-		// 	email: values.email,
-		// 	password: values.password,
-		// 	form,
-		// });
+		signIn({
+			email: values.email,
+			password: values.password,
+			form,
+		});
 	}
 	return (
 		<div className="space-y-6">
@@ -91,14 +92,12 @@ function SigninForm({ className, ...props }: React.ComponentProps<"form">) {
 						<Button
 							type="submit"
 							className="w-full"
-							// disabled={isPending || !form.formState.isValid}
-						>
-							{/* {isPending ? (
+							disabled={isPending || !form.formState.isValid}>
+							{isPending ? (
 								<Loader2 className="size-4 animate-spin" />
 							) : (
 								"Sign in"
-							)} */}
-							Sign in
+							)}
 						</Button>
 					</form>
 				</Form>
@@ -110,20 +109,21 @@ function SigninForm({ className, ...props }: React.ComponentProps<"form">) {
 				<Button
 					variant="outline"
 					className="w-full"
-					// disabled={isSocialSignInPending}
-					// onClick={() => socialSignIn()}>
-					// {isSocialSignInPending ? (
-					// 	<Loader2 className="size-4 animate-spin" />
-					// ) : (
-					// 	<>
-					// 		<Image
-					// 			src="/icons8-google.svg"
-					// 			alt="Google"
-					// 			width={20}
-					// 			height={20}
-					// 			/>
-				>
-					Sign in with Google
+					disabled={isSocialSignInPending}
+					onClick={() => socialSignIn()}>
+					{isSocialSignInPending ? (
+						<Loader2 className="size-4 animate-spin" />
+					) : (
+						<>
+							<Image
+								src="/icons8-google.svg"
+								alt="Google"
+								width={20}
+								height={20}
+							/>
+							Sign in with Google
+						</>
+					)}
 				</Button>
 			</div>
 			<div className="text-sm">
