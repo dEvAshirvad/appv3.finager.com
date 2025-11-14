@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -25,16 +25,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { useSession } from "@/queries/auth";
 import { useCreateOrganization } from "@/queries/organization";
-import { useUpdateUser } from "@/queries/auth";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { completeOnboarding } from "@/queries/auth";
 
 const formSchema = z
 	.object({
-		name: z.string().min(2, "Name must be at least 2 characters"),
 		organizationName: z
 			.string()
 			.min(2, "Organization name must be at least 2 characters"),
@@ -58,30 +52,16 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 function OnboardingForm({ className, ...props }: React.ComponentProps<"form">) {
-	const { data, isFetched, isLoading } = useSession();
 	const { mutate: createOrganization } = useCreateOrganization();
-	const { mutate: updateUser } = useUpdateUser();
-	const router = useRouter();
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			name: "",
 			organizationName: "",
 			isGstregisterd: false,
 			gstin: "",
 			industry: "",
 		},
 	});
-
-	// Update form when user data loads
-	useEffect(() => {
-		if (data?.user?.name) {
-			form.reset({
-				...form.getValues(),
-				name: data.user.name,
-			});
-		}
-	}, [data?.user?.name, form]);
 
 	const isGstRegistered = form.watch("isGstregisterd");
 
@@ -91,37 +71,15 @@ function OnboardingForm({ className, ...props }: React.ComponentProps<"form">) {
 		}
 
 		// Create organization first
-		createOrganization(
-			{
-				name: values.organizationName,
-				slug: values.organizationName.toLowerCase().replace(/ /g, "-"),
-				type: "company",
-				isGstRegistered: values.isGstregisterd,
-				gstin: values.gstin || "",
-				industry: values.industry,
-				form,
-			},
-			{
-				onSuccess: async () => {
-					await completeOnboarding();
-					// Update user after organization is created
-					updateUser(
-						{
-							name: values.name,
-						},
-						{
-							onSuccess: () => {
-								toast.success("Onboarding completed successfully!");
-								// Wait for 1 second before redirecting to dashboard
-								setTimeout(() => {
-									router.push("/dashboard");
-								}, 1000);
-							},
-						}
-					);
-				},
-			}
-		);
+		createOrganization({
+			name: values.organizationName,
+			slug: values.organizationName.toLowerCase().replace(/ /g, "-"),
+			type: "company",
+			isGstRegistered: values.isGstregisterd,
+			gstin: values.gstin || "",
+			industry: values.industry,
+			form,
+		});
 	}
 
 	return (
@@ -131,19 +89,6 @@ function OnboardingForm({ className, ...props }: React.ComponentProps<"form">) {
 					onSubmit={form.handleSubmit(onSubmit)}
 					className={cn("space-y-6", className)}
 					{...props}>
-					<FormField
-						control={form.control}
-						name="name"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Full Name</FormLabel>
-								<FormControl>
-									<Input placeholder="John Doe" {...field} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
 					<FormField
 						control={form.control}
 						name="organizationName"
@@ -227,7 +172,7 @@ function OnboardingForm({ className, ...props }: React.ComponentProps<"form">) {
 						)}
 					/>
 					<Button type="submit" className="w-full">
-						Complete Onboarding
+						Create Organization
 					</Button>
 				</form>
 			</Form>

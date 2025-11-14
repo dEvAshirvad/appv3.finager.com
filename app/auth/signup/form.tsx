@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-// import { useEmailSignUp, useSocialSignInGoogle } from "@/queries/auth";
+import { useEmailSignUp, useSocialSignInGoogle } from "@/queries/auth";
 
 const formSchema = z.object({
 	// name: z.string().min(2, "Name must be at least 2 characters"),
@@ -27,26 +27,24 @@ const formSchema = z.object({
 });
 
 function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
-	// const { isPending } = useEmailSignUp();
-	// const { mutate: socialSignInGoogle, isPending: isSocialPending } =
-	// 	useSocialSignInGoogle();
+	const { mutate: signUp, isPending } = useEmailSignUp();
+	const { mutate: socialSignInGoogle, isPending: isSocialPending } =
+		useSocialSignInGoogle();
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			// name: "",
 			email: "",
 			password: "",
 		},
 	});
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
-		// signUp({
-		// 	email: values.email,
-		// 	password: values.password,
-		// 	name: values.name,
-		// 	form,
-		// });
+		signUp({
+			email: values.email,
+			password: values.password,
+			name: values.email.split("@")[0], // Use email prefix as default name
+			form,
+		});
 	}
 
 	return (
@@ -99,14 +97,12 @@ function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
 						<Button
 							type="submit"
 							className="w-full"
-							// disabled={isPending || !form.formState.isValid}
-						>
-							{/* {isPending ? (
+							disabled={isPending || !form.formState.isValid}>
+							{isPending ? (
 								<Loader2 className="size-4 animate-spin" />
 							) : (
 								"Create Account"
-							)} */}
-							Create Account
+							)}
 						</Button>
 					</form>
 				</Form>
@@ -122,10 +118,9 @@ function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
 				<Button
 					variant="outline"
 					className="w-full"
-					// disabled={isSocialPending}
-					// onClick={() => socialSignInGoogle()}
-				>
-					{/* {isSocialPending ? (
+					disabled={isSocialPending}
+					onClick={() => socialSignInGoogle()}>
+					{isSocialPending ? (
 						<Loader2 className="size-4 animate-spin" />
 					) : (
 						<>
@@ -136,7 +131,7 @@ function SignupForm({ className, ...props }: React.ComponentProps<"form">) {
 								height={20}
 							/>
 						</>
-					)} */}
+					)}
 					Sign up with Google
 				</Button>
 			</div>

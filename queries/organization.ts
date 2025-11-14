@@ -154,7 +154,7 @@ export function useCreateOrganization() {
 
 	return useMutation({
 		mutationFn: createOrganization,
-		onSuccess: (data) => {
+		onSuccess: async (data) => {
 			toast.success("Organization created successfully!");
 			queryClient.invalidateQueries({
 				queryKey: organizationKeys.lists(),
@@ -162,8 +162,6 @@ export function useCreateOrganization() {
 			queryClient.invalidateQueries({
 				queryKey: organizationKeys.full(),
 			});
-
-			completeOnboarding();
 		},
 		onError: (error: unknown) => {
 			if (error instanceof AxiosError) {

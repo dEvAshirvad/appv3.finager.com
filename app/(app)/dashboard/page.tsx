@@ -27,6 +27,7 @@ import {
 import { useSession } from "@/queries/auth";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useFullOrganization } from "@/queries/organization";
 
 // Sample data for the dashboard
 const dashboardData = {
@@ -95,6 +96,8 @@ const dashboardData = {
 };
 
 function Dashboard() {
+	const { data: sessionData } = useSession();
+	const { data: organizationData } = useFullOrganization();
 	const [selectedPeriod, setSelectedPeriod] = useState("this-fiscal-year");
 
 	const formatCurrency = (amount: number) => {
@@ -113,14 +116,16 @@ function Dashboard() {
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-2">
 							<Avatar className="size-16 rounded-md">
-								<AvatarImage src="https://github.com/shadcn.png" />
+								<AvatarImage src={sessionData?.user?.image} />
 								<AvatarFallback>AS</AvatarFallback>
 							</Avatar>
 							<div className="flex flex-col gap-0">
 								<h1 className="font-semibold text-xl">
-									Hello, Ashirvad Satapathy
+									Hello, {sessionData?.user?.name}
 								</h1>
-								<p className="text-muted-foreground capitalize">OrggTest</p>
+								<p className="text-muted-foreground capitalize">
+									Organization: {organizationData?.name}
+								</p>
 							</div>
 						</div>
 						<div className="text-sm text-muted-foreground text-right">

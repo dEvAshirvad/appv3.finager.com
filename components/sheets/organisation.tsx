@@ -11,7 +11,14 @@ import {
 } from "@/components/ui/sheet";
 import * as RadioGroup from "@radix-ui/react-radio-group";
 
-import { Building2, CircleCheck, Settings, XIcon, Loader2 } from "lucide-react";
+import {
+	Building2,
+	CircleCheck,
+	Settings,
+	XIcon,
+	Loader2,
+	PlusIcon,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import {
 	useOrganizationList,
@@ -64,8 +71,16 @@ function OrganisationSheet() {
 						</SheetClose>
 					</div>
 				</SheetHeader>
-				<div className="py-4 px-6 border-b">
+				<div className="py-4 px-6 border-b flex flex-row items-center justify-between">
 					<h1 className="font-semibold">My Organisations</h1>
+					<SheetClose asChild>
+						<Button
+							variant="link"
+							onClick={() => router.push("/organizations/create")}>
+							<PlusIcon className="size-4" />
+							Create
+						</Button>
+					</SheetClose>
 				</div>
 				{isLoadingOrgs ? (
 					<div className="flex items-center justify-center py-8">
