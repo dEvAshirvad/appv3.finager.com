@@ -42,7 +42,7 @@ function SigninForm({ className, ...props }: React.ComponentProps<"form">) {
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		console.log(values);
-		signIn({
+		await signIn({
 			email: values.email,
 			password: values.password,
 			form,

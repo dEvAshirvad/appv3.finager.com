@@ -22,7 +22,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function Authenticated({ children }: { children: ReactNode }) {
-	const { data, isLoading, error, isFetched } = useSession();
+	const { data, isLoading, error, isFetched, isFetching } = useSession();
 	const router = useRouter();
 
 	const value: AuthContextType = useMemo(() => {
@@ -30,28 +30,30 @@ export function Authenticated({ children }: { children: ReactNode }) {
 			user: data?.user || null,
 			session: data?.session || null,
 			isAuthenticated: !!data?.session,
-			isLoading,
+			isLoading: isLoading || isFetching,
 			error: error as Error | null,
 		};
-	}, [data, isLoading, error]);
+	}, [data, isLoading, isFetching, error]);
 
 	// Handle authentication check in useEffect to avoid setState during render
+	// Only redirect if we're not loading/fetching and we've fetched at least once
 	useEffect(() => {
-		if (!isLoading && !data?.session && isFetched) {
+		if (!isLoading && !isFetching && !data?.session && isFetched) {
 			toast.error("You are not authenticated");
 			router.push("/auth/signin");
 		}
-	}, [isLoading, data?.session, router, isFetched]);
+	}, [isLoading, isFetching, data?.session, router, isFetched]);
+
+	// Show loading state while checking authentication or refetching
+	if (isLoading || isFetching) {
+		return <div>Loading...</div>;
+	}
 
 	// Don't render children if not authenticated (navigation will happen in useEffect)
 	if (!data?.session) {
 		return <div>Loading...</div>;
 	}
 
-	// Show loading state while checking authentication
-	if (isLoading) {
-		return <div>Loading...</div>;
-	}
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

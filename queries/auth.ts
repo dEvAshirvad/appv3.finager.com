@@ -255,20 +255,22 @@ export function useEmailSignIn() {
 	const router = useRouter();
 	return useMutation({
 		mutationFn: emailSignIn,
-		onSuccess: (data) => {
+		onSuccess: async (data) => {
 			console.log(data);
-			// Invalidate and refetch session after successful sign in
+			// Refetch session immediately after successful sign in
 			toast("Signed in successfully!", {
 				description: "Redirecting to dashboard...",
 			});
-			setTimeout(() => {
-				if (data.redirect) {
-					router.push(data.url);
-				} else {
-					router.push("/dashboard");
-				}
-			}, 3000);
-			queryClient.invalidateQueries({ queryKey: sessionKeys.all });
+
+			// Refetch the session query and wait for it to complete
+			await queryClient.refetchQueries({ queryKey: sessionKeys.all });
+
+			// Now redirect after session is confirmed
+			if (data.redirect) {
+				router.push(data.url);
+			} else {
+				router.push("/dashboard");
+			}
 		},
 		onError: (error: unknown) => {
 			if (error instanceof AxiosError) {
