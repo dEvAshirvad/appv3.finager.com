@@ -129,6 +129,18 @@ const data = {
 					title: "Cash Flow",
 					url: "/reports/cash-flow",
 				},
+				{
+					title: "GSTR-1 Reports",
+					url: "/reports/gst/gstr1",
+				},
+				{
+					title: "GSTR-2 Reports",
+					url: "/reports/gst/gstr2",
+				},
+				{
+					title: "GSTR-3B Reports",
+					url: "/reports/gst/gstr3b",
+				},
 			],
 		},
 	],

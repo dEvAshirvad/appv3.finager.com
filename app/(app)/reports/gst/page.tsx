@@ -3,8 +3,13 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, FileText, TrendingUp, TrendingDown } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import {
 	Select,
 	SelectContent,
@@ -13,8 +18,15 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import DashTitle from "@/components/header/dash-title";
-import { useGSTList, useGSTR3B, useGSTR1, useGSTR2 } from "@/queries/gst";
-import { format } from "date-fns";
+import {
+	useGSTList,
+	useGSTR3B,
+	useGSTR1,
+	useGSTR2,
+	isGSTR3BBooksFormat,
+	isGSTR1BooksFormat,
+	isGSTR2BooksFormat,
+} from "@/queries/gst";
 
 export default function GSTReportsPage() {
 	const searchParams = useSearchParams();
@@ -60,25 +72,28 @@ export default function GSTReportsPage() {
 	const financialYears = React.useMemo(() => {
 		const years: string[] = [];
 		const now = new Date();
-		const currentFY = now.getMonth() >= 3 
-			? `${now.getFullYear()}-${String(now.getFullYear() + 1).slice(-2)}`
-			: `${now.getFullYear() - 1}-${String(now.getFullYear()).slice(-2)}`;
+		const currentFY =
+			now.getMonth() >= 3
+				? `${now.getFullYear()}-${String(now.getFullYear() + 1).slice(-2)}`
+				: `${now.getFullYear() - 1}-${String(now.getFullYear()).slice(-2)}`;
 		years.push(currentFY);
-		years.push(`${now.getFullYear() - 1}-${String(now.getFullYear()).slice(-2)}`);
+		years.push(
+			`${now.getFullYear() - 1}-${String(now.getFullYear()).slice(-2)}`
+		);
 		return years;
 	}, []);
 
 	const gstRecords = gstListData?.data?.docs || [];
-	const gstr3b = gstr3bData?.data?.data;
-	const gstr1 = gstr1Data?.data?.data;
-	const gstr2 = gstr2Data?.data?.data;
+	const gstr3b = gstr3bData?.data;
+	const gstr1 = gstr1Data?.data;
+	const gstr2 = gstr2Data?.data;
 
 	const isLoading = isLoading3B || isLoading1 || isLoading2;
 
 	return (
 		<div className="space-y-6">
 			<DashTitle title="GST Reports" />
-			
+
 			<Card>
 				<CardHeader>
 					<CardTitle>Select GST Credentials & Period</CardTitle>
@@ -97,11 +112,13 @@ export default function GSTReportsPage() {
 									<SelectValue placeholder="Select GSTIN" />
 								</SelectTrigger>
 								<SelectContent>
-									{gstRecords.map((gst) => (
-										<SelectItem key={gst.id} value={gst.id}>
-											{gst.gstin}
-										</SelectItem>
-									))}
+									{gstRecords
+										.filter((gst) => gst.id && gst.id.trim() !== "")
+										.map((gst) => (
+											<SelectItem key={gst.id} value={gst.id}>
+												{gst.gstin}
+											</SelectItem>
+										))}
 								</SelectContent>
 							</Select>
 						</div>
@@ -148,7 +165,7 @@ export default function GSTReportsPage() {
 			{selectedGstId && retPeriod && fy && !isLoading && (
 				<div className="grid gap-6">
 					{/* GSTR-3B Summary */}
-					{gstr3b && (
+					{gstr3b && !isGSTR3BBooksFormat(gstr3b) && (
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
@@ -161,46 +178,61 @@ export default function GSTReportsPage() {
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 									<div>
 										<p className="text-sm text-muted-foreground">CGST</p>
-										<p className="text-2xl font-bold">₹{gstr3b.liability.cgst.toLocaleString("en-IN")}</p>
+										<p className="text-2xl font-bold">
+											₹{gstr3b.liability.cgst.toLocaleString("en-IN")}
+										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">SGST</p>
-										<p className="text-2xl font-bold">₹{gstr3b.liability.sgst.toLocaleString("en-IN")}</p>
+										<p className="text-2xl font-bold">
+											₹{gstr3b.liability.sgst.toLocaleString("en-IN")}
+										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">IGST</p>
-										<p className="text-2xl font-bold">₹{gstr3b.liability.igst.toLocaleString("en-IN")}</p>
+										<p className="text-2xl font-bold">
+											₹{gstr3b.liability.igst.toLocaleString("en-IN")}
+										</p>
 									</div>
 									<div>
-										<p className="text-sm text-muted-foreground">Total Liability</p>
-										<p className="text-2xl font-bold">₹{gstr3b.liability.total.toLocaleString("en-IN")}</p>
+										<p className="text-sm text-muted-foreground">
+											Total Liability
+										</p>
+										<p className="text-2xl font-bold">
+											₹{gstr3b.liability.total.toLocaleString("en-IN")}
+										</p>
 									</div>
 								</div>
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
 									<div>
 										<p className="text-sm text-muted-foreground">ITC CGST</p>
 										<p className="text-2xl font-bold text-green-600">
-											<TrendingUp className="inline h-4 w-4 mr-1" />
-											₹{gstr3b.itc.cgst.toLocaleString("en-IN")}
+											<TrendingUp className="inline h-4 w-4 mr-1" />₹
+											{gstr3b.itc.cgst.toLocaleString("en-IN")}
 										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">ITC SGST</p>
 										<p className="text-2xl font-bold text-green-600">
-											<TrendingUp className="inline h-4 w-4 mr-1" />
-											₹{gstr3b.itc.sgst.toLocaleString("en-IN")}
+											<TrendingUp className="inline h-4 w-4 mr-1" />₹
+											{gstr3b.itc.sgst.toLocaleString("en-IN")}
 										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">Total ITC</p>
 										<p className="text-2xl font-bold text-green-600">
-											<TrendingUp className="inline h-4 w-4 mr-1" />
-											₹{gstr3b.itc.total_eligible.toLocaleString("en-IN")}
+											<TrendingUp className="inline h-4 w-4 mr-1" />₹
+											{gstr3b.itc.total_eligible.toLocaleString("en-IN")}
 										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">Net Payable</p>
-										<p className={`text-2xl font-bold ${gstr3b.net_payable >= 0 ? "text-red-600" : "text-green-600"}`}>
+										<p
+											className={`text-2xl font-bold ${
+												gstr3b.net_payable >= 0
+													? "text-red-600"
+													: "text-green-600"
+											}`}>
 											{gstr3b.net_payable >= 0 ? (
 												<TrendingDown className="inline h-4 w-4 mr-1" />
 											) : (
@@ -211,7 +243,9 @@ export default function GSTReportsPage() {
 									</div>
 								</div>
 								<div className="pt-4 border-t">
-									<p className="text-sm text-muted-foreground">Status: <span className="font-medium">{gstr3b.status}</span></p>
+									<p className="text-sm text-muted-foreground">
+										Status: <span className="font-medium">{gstr3b.status}</span>
+									</p>
 									{gstr3b.late_fee > 0 && (
 										<p className="text-sm text-destructive mt-2">
 											Late Fee: ₹{gstr3b.late_fee.toLocaleString("en-IN")}
@@ -223,92 +257,145 @@ export default function GSTReportsPage() {
 					)}
 
 					{/* GSTR-1 Summary */}
-					{gstr1 && (
+					{gstr1 && !isGSTR1BooksFormat(gstr1) && (
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
 									<FileText className="h-5 w-5" />
 									GSTR-1 Summary (Outward Supplies)
 								</CardTitle>
-								<CardDescription>Outward Supplies Reconciliation</CardDescription>
+								<CardDescription>
+									Outward Supplies Reconciliation
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 									<div>
-										<p className="text-sm text-muted-foreground">Total Invoices</p>
+										<p className="text-sm text-muted-foreground">
+											Total Invoices
+										</p>
 										<p className="text-2xl font-bold">{gstr1.total_invoices}</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">B2B Count</p>
 										<p className="text-2xl font-bold">{gstr1.b2b.count}</p>
-										<p className="text-sm text-muted-foreground">₹{gstr1.b2b.value.toLocaleString("en-IN")}</p>
+										<p className="text-sm text-muted-foreground">
+											₹{gstr1.b2b.value.toLocaleString("en-IN")}
+										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">B2C Count</p>
 										<p className="text-2xl font-bold">{gstr1.b2c.count}</p>
-										<p className="text-sm text-muted-foreground">₹{gstr1.b2c.value.toLocaleString("en-IN")}</p>
+										<p className="text-sm text-muted-foreground">
+											₹{gstr1.b2c.value.toLocaleString("en-IN")}
+										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">Total Tax</p>
-										<p className="text-2xl font-bold">₹{gstr1.total_tax.toLocaleString("en-IN")}</p>
+										<p className="text-2xl font-bold">
+											₹{gstr1.total_tax.toLocaleString("en-IN")}
+										</p>
 									</div>
 								</div>
-								{gstr1.hsn_summary && gstr1.hsn_summary.length > 0 && (
-									<div className="pt-4 border-t">
-										<p className="text-sm font-medium mb-2">HSN Summary</p>
-										<div className="space-y-2">
-											{gstr1.hsn_summary.slice(0, 5).map((hsn, idx) => (
-												<div key={idx} className="flex justify-between text-sm">
-													<span>{hsn.hsn} - {hsn.desc}</span>
-													<span className="font-medium">₹{hsn.tax.toLocaleString("en-IN")}</span>
-												</div>
-											))}
+								{"hsn_summary" in gstr1 &&
+									gstr1.hsn_summary &&
+									Array.isArray(gstr1.hsn_summary) &&
+									gstr1.hsn_summary.length > 0 && (
+										<div className="pt-4 border-t">
+											<p className="text-sm font-medium mb-2">HSN Summary</p>
+											<div className="space-y-2">
+												{gstr1.hsn_summary.slice(0, 5).map(
+													(
+														hsn: {
+															hsn: string;
+															desc: string;
+															tax: number;
+														},
+														idx: number
+													) => (
+														<div
+															key={idx}
+															className="flex justify-between text-sm">
+															<span>
+																{hsn.hsn} - {hsn.desc}
+															</span>
+															<span className="font-medium">
+																₹{hsn.tax.toLocaleString("en-IN")}
+															</span>
+														</div>
+													)
+												)}
+											</div>
 										</div>
-									</div>
-								)}
+									)}
 							</CardContent>
 						</Card>
 					)}
 
 					{/* GSTR-2A/2B Summary */}
-					{gstr2 && (
+					{gstr2 && !isGSTR2BooksFormat(gstr2) && (
 						<Card>
 							<CardHeader>
 								<CardTitle className="flex items-center gap-2">
 									<FileText className="h-5 w-5" />
 									GSTR-2A/2B Summary (Inward Supplies)
 								</CardTitle>
-								<CardDescription>Inward Supplies & ITC Eligibility</CardDescription>
+								<CardDescription>
+									Inward Supplies & ITC Eligibility
+								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 									<div>
-										<p className="text-sm text-muted-foreground">Total Suppliers</p>
-										<p className="text-2xl font-bold">{gstr2.total_suppliers}</p>
+										<p className="text-sm text-muted-foreground">
+											Total Suppliers
+										</p>
+										<p className="text-2xl font-bold">
+											{gstr2.total_suppliers}
+										</p>
 									</div>
 									<div>
-										<p className="text-sm text-muted-foreground">B2B Invoices</p>
+										<p className="text-sm text-muted-foreground">
+											B2B Invoices
+										</p>
 										<p className="text-2xl font-bold">{gstr2.b2b_invoices}</p>
 									</div>
 									<div>
-										<p className="text-sm text-muted-foreground">Taxable Value</p>
-										<p className="text-2xl font-bold">₹{gstr2.total_taxable_value.toLocaleString("en-IN")}</p>
+										<p className="text-sm text-muted-foreground">
+											Taxable Value
+										</p>
+										<p className="text-2xl font-bold">
+											₹{gstr2.total_taxable_value.toLocaleString("en-IN")}
+										</p>
 									</div>
 									<div>
 										<p className="text-sm text-muted-foreground">Total ITC</p>
 										<p className="text-2xl font-bold text-green-600">
-											₹{(gstr2.total_itc.cgst + gstr2.total_itc.sgst + gstr2.total_itc.igst).toLocaleString("en-IN")}
+											₹
+											{(
+												gstr2.total_itc.cgst +
+												gstr2.total_itc.sgst +
+												gstr2.total_itc.igst
+											).toLocaleString("en-IN")}
 										</p>
 									</div>
 								</div>
 								<div className="pt-4 border-t grid grid-cols-2 gap-4">
 									<div>
-										<p className="text-sm text-muted-foreground">Mismatched Invoices</p>
-										<p className="text-2xl font-bold text-yellow-600">{gstr2.mismatched_invoices}</p>
+										<p className="text-sm text-muted-foreground">
+											Mismatched Invoices
+										</p>
+										<p className="text-2xl font-bold text-yellow-600">
+											{gstr2.mismatched_invoices}
+										</p>
 									</div>
 									<div>
-										<p className="text-sm text-muted-foreground">Missing in Books</p>
-										<p className="text-2xl font-bold text-red-600">{gstr2.missing_in_books}</p>
+										<p className="text-sm text-muted-foreground">
+											Missing in Books
+										</p>
+										<p className="text-2xl font-bold text-red-600">
+											{gstr2.missing_in_books}
+										</p>
 									</div>
 								</div>
 							</CardContent>
@@ -319,4 +406,3 @@ export default function GSTReportsPage() {
 		</div>
 	);
 }
-
