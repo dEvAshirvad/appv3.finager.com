@@ -1,104 +1,123 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	DollarSign,
-	CreditCard,
-	Plus,
-	ChevronDown,
-	Download,
-	RefreshCw,
-	Users,
-	FileText,
-	ShoppingCart,
-	Activity,
-} from "lucide-react";
+import { Plus, Activity, Loader2 } from "lucide-react";
 import { useSession } from "@/queries/auth";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useFullOrganization } from "@/queries/organization";
-
-// Sample data for the dashboard
-const dashboardData = {
-	receivables: {
-		total: 0,
-		current: 0,
-		overdue: 0,
-	},
-	payables: {
-		total: 0,
-		current: 0,
-		overdue: 0,
-	},
-	cashFlow: {
-		openingBalance: 0,
-		incoming: 0,
-		outgoing: 0,
-		closingBalance: 0,
-		monthlyData: [
-			{ month: "Apr 2025", amount: 0 },
-			{ month: "May 2025", amount: 0 },
-			{ month: "Jun 2025", amount: 0 },
-			{ month: "Jul 2025", amount: 0 },
-			{ month: "Aug 2025", amount: 0 },
-			{ month: "Sep 2025", amount: 0 },
-			{ month: "Oct 2025", amount: 0 },
-			{ month: "Nov 2025", amount: 0 },
-			{ month: "Dec 2025", amount: 0 },
-			{ month: "Jan 2026", amount: 0 },
-			{ month: "Feb 2026", amount: 0 },
-			{ month: "Mar 2026", amount: 0 },
-		],
-	},
-	recentActivities: [
-		{
-			id: 1,
-			type: "invoice",
-			description: "Invoice #INV-001 created",
-			amount: 25000,
-			date: "2024-01-15",
-			status: "sent",
-		},
-		{
-			id: 2,
-			type: "payment",
-			description: "Payment received from Customer A",
-			amount: 15000,
-			date: "2024-01-14",
-			status: "completed",
-		},
-		{
-			id: 3,
-			type: "expense",
-			description: "Office supplies purchased",
-			amount: 5000,
-			date: "2024-01-13",
-			status: "pending",
-		},
-	],
-	quickStats: {
-		totalCustomers: 0,
-		totalInvoices: 0,
-		totalOrders: 0,
-		totalExpenses: 0,
-	},
-};
+import { useInvoiceList, InvoiceStatus } from "@/queries/invoices";
+import { useBillList, BillStatus } from "@/queries/bills";
+import { useContactList, ContactType, ContactStatus } from "@/queries/contacts";
 
 function Dashboard() {
+	const router = useRouter();
 	const { data: sessionData } = useSession();
 	const { data: organizationData } = useFullOrganization();
-	const [selectedPeriod, setSelectedPeriod] = useState("this-fiscal-year");
+	const organizationId = sessionData?.session?.activeOrganizationId;
+
+	// Fetch unpaid invoices (receivables)
+	const { data: invoicesData, isLoading: isLoadingInvoices } = useInvoiceList({
+		organizationId,
+		status: InvoiceStatus.DRAFT,
+		page: 1,
+		limit: 50, // Get all for calculation
+	});
+
+	// Fetch partially paid invoices
+	const { data: partiallyPaidInvoicesData } = useInvoiceList({
+		organizationId,
+		status: InvoiceStatus.PARTIALLY_PAID,
+		page: 1,
+		limit: 10,
+	});
+
+	// Fetch unpaid bills (payables)
+	const { data: billsData, isLoading: isLoadingBills } = useBillList({
+		status: BillStatus.DRAFT,
+		page: 1,
+		limit: 10,
+	});
+
+	// Fetch partially paid bills
+	const { data: partiallyPaidBillsData } = useBillList({
+		status: BillStatus.PARTIALLY_PAID,
+		page: 1,
+		limit: 10,
+	});
+
+	// Fetch customers count
+	const { data: customersData } = useContactList({
+		organizationId,
+		type: ContactType.CUSTOMER,
+		status: ContactStatus.ACTIVE,
+		page: 1,
+		limit: 1,
+	});
+
+	// Calculate receivables
+	const receivables = useMemo(() => {
+		const allInvoices = [
+			...(invoicesData?.data?.docs || []),
+			...(partiallyPaidInvoicesData?.data?.docs || []),
+		];
+		const now = new Date();
+		let total = 0;
+		let current = 0;
+		let overdue = 0;
+
+		allInvoices.forEach((invoice) => {
+			const balance = invoice.balance || 0;
+			total += balance;
+
+			if (invoice.dueDate) {
+				const dueDate = new Date(invoice.dueDate);
+				if (dueDate < now) {
+					overdue += balance;
+				} else {
+					current += balance;
+				}
+			} else {
+				current += balance;
+			}
+		});
+
+		return { total, current, overdue };
+	}, [invoicesData, partiallyPaidInvoicesData]);
+
+	// Calculate payables
+	const payables = useMemo(() => {
+		const allBills = [
+			...(billsData?.data?.docs || []),
+			...(partiallyPaidBillsData?.data?.docs || []),
+		];
+		const now = new Date();
+		let total = 0;
+		let current = 0;
+		let overdue = 0;
+
+		allBills.forEach((bill) => {
+			const balance = bill.balance || 0;
+			total += balance;
+
+			if (bill.dueDate) {
+				const dueDate = new Date(bill.dueDate);
+				if (dueDate < now) {
+					overdue += balance;
+				} else {
+					current += balance;
+				}
+			} else {
+				current += balance;
+			}
+		});
+
+		return { total, current, overdue };
+	}, [billsData, partiallyPaidBillsData]);
+
+	const isLoading = isLoadingInvoices || isLoadingBills;
 
 	const formatCurrency = (amount: number) => {
 		return new Intl.NumberFormat("en-IN", {
@@ -152,48 +171,137 @@ function Dashboard() {
 
 				<TabsContent value="dashboard">
 					<div className="p-6 space-y-6">
-						{/* Financial Overview Cards */}
-						<div className="grid grid-cols-2 gap-6">
-							{/* Total Receivables */}
-							<Card>
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardTitle className="text-sm font-medium">
-										Total Receivables
-									</CardTitle>
-									<Button variant="ghost" size="sm">
-										<Plus className="h-4 w-4" />
-									</Button>
-								</CardHeader>
-								<CardContent>
-									<div className="text-2xl font-bold">
-										{formatCurrency(dashboardData.receivables.total)}
-									</div>
-									<p className="text-xs text-muted-foreground">
-										Total Unpaid Invoices
-									</p>
-								</CardContent>
-							</Card>
+						{isLoading ? (
+							<div className="flex items-center justify-center h-64">
+								<Loader2 className="h-8 w-8 animate-spin" />
+							</div>
+						) : (
+							<>
+								{/* Financial Overview Cards */}
+								<div className="grid grid-cols-2 gap-6">
+									{/* Total Receivables */}
+									<Card>
+										<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+											<CardTitle className="text-sm font-medium">
+												Total Receivables
+											</CardTitle>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => router.push("/sales/invoices")}>
+												<Plus className="h-4 w-4" />
+											</Button>
+										</CardHeader>
+										<CardContent>
+											<div className="text-2xl font-bold">
+												{formatCurrency(receivables.total)}
+											</div>
+											<p className="text-xs text-muted-foreground">
+												Total Unpaid Invoices
+											</p>
+											<div className="mt-2 flex gap-4 text-xs">
+												<span className="text-muted-foreground">
+													Current: {formatCurrency(receivables.current)}
+												</span>
+												<span className="text-destructive">
+													Overdue: {formatCurrency(receivables.overdue)}
+												</span>
+											</div>
+										</CardContent>
+									</Card>
 
-							{/* Total Payables */}
-							<Card>
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardTitle className="text-sm font-medium">
-										Total Payables
-									</CardTitle>
-									<Button variant="ghost" size="sm">
-										<Plus className="h-4 w-4" />
-									</Button>
-								</CardHeader>
-								<CardContent>
-									<div className="text-2xl font-bold">
-										{formatCurrency(dashboardData.payables.total)}
-									</div>
-									<p className="text-xs text-muted-foreground">
-										Total Unpaid Bills
-									</p>
-								</CardContent>
-							</Card>
-						</div>
+									{/* Total Payables */}
+									<Card>
+										<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+											<CardTitle className="text-sm font-medium">
+												Total Payables
+											</CardTitle>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => router.push("/purchases/bills")}>
+												<Plus className="h-4 w-4" />
+											</Button>
+										</CardHeader>
+										<CardContent>
+											<div className="text-2xl font-bold">
+												{formatCurrency(payables.total)}
+											</div>
+											<p className="text-xs text-muted-foreground">
+												Total Unpaid Bills
+											</p>
+											<div className="mt-2 flex gap-4 text-xs">
+												<span className="text-muted-foreground">
+													Current: {formatCurrency(payables.current)}
+												</span>
+												<span className="text-destructive">
+													Overdue: {formatCurrency(payables.overdue)}
+												</span>
+											</div>
+										</CardContent>
+									</Card>
+								</div>
+
+								{/* Quick Stats */}
+								<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+									<Card>
+										<CardHeader className="pb-2">
+											<CardTitle className="text-sm font-medium">
+												Total Customers
+											</CardTitle>
+										</CardHeader>
+										<CardContent>
+											<div className="text-2xl font-bold">
+												{customersData?.data?.totalDocs || 0}
+											</div>
+										</CardContent>
+									</Card>
+									<Card>
+										<CardHeader className="pb-2">
+											<CardTitle className="text-sm font-medium">
+												Total Invoices
+											</CardTitle>
+										</CardHeader>
+										<CardContent>
+											<div className="text-2xl font-bold">
+												{(invoicesData?.data?.totalDocs || 0) +
+													(partiallyPaidInvoicesData?.data?.totalDocs || 0)}
+											</div>
+										</CardContent>
+									</Card>
+									<Card>
+										<CardHeader className="pb-2">
+											<CardTitle className="text-sm font-medium">
+												Total Bills
+											</CardTitle>
+										</CardHeader>
+										<CardContent>
+											<div className="text-2xl font-bold">
+												{(billsData?.data?.totalDocs || 0) +
+													(partiallyPaidBillsData?.data?.totalDocs || 0)}
+											</div>
+										</CardContent>
+									</Card>
+									<Card>
+										<CardHeader className="pb-2">
+											<CardTitle className="text-sm font-medium">
+												Net Position
+											</CardTitle>
+										</CardHeader>
+										<CardContent>
+											<div
+												className={`text-2xl font-bold ${
+													receivables.total - payables.total >= 0
+														? "text-green-600"
+														: "text-red-600"
+												}`}>
+												{formatCurrency(receivables.total - payables.total)}
+											</div>
+										</CardContent>
+									</Card>
+								</div>
+							</>
+						)}
 					</div>
 				</TabsContent>
 

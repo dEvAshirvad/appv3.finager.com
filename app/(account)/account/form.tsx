@@ -61,7 +61,7 @@ function AccountForm({ className, ...props }: React.ComponentProps<"form">) {
 		);
 	}
 
-	return (
+  return (
 		<div className="space-y-6">
 			<Form {...form}>
 				<form

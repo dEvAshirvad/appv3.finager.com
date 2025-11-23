@@ -7,6 +7,7 @@ import {
 	Bot,
 	Building,
 	Command,
+	FileText,
 	Frame,
 	Home,
 	LifeBuoy,
@@ -30,6 +31,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
 
 const data = {
 	user: {
@@ -53,6 +55,11 @@ const data = {
 			url: "/organizations",
 			icon: Building,
 		},
+		{
+			title: "GST",
+			url: "/gst",
+			icon: FileText,
+		},
 	],
 	navSecondary: [
 		{
@@ -71,6 +78,13 @@ const data = {
 export function AccountSidebar({
 	...props
 }: React.ComponentProps<typeof Sidebar>) {
+	const pathname = usePathname();
+	const isActive = (url: string) => pathname.startsWith(url);
+
+	const navMain = data.navMain.map((item) => ({
+		...item,
+		isActive: isActive(item.url),
+	}));
 	return (
 		<Sidebar {...props}>
 			<SidebarHeader className="border-b">
@@ -91,7 +105,7 @@ export function AccountSidebar({
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
+				<NavMain items={navMain} />
 				<NavSecondary items={data.navSecondary} className="mt-auto" />
 			</SidebarContent>
 		</Sidebar>

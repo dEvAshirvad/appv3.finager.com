@@ -5,6 +5,7 @@ import {
 	BarChart,
 	Book,
 	Calculator,
+	FileText,
 	Home,
 	IndianRupee,
 	LifeBuoy,
@@ -25,6 +26,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { usePathname } from "next/navigation";
 
 const data = {
 	user: {
@@ -38,92 +40,120 @@ const data = {
 			url: "/dashboard",
 			icon: Home,
 		},
-		// {
-		// 	title: "Items",
-		// 	url: "/items",
-		// 	icon: Package,
-		// },
-		// {
-		// 	title: "Sales",
-		// 	url: "/sales/customers",
-		// 	icon: IndianRupee,
-		// 	isActive: true,
-		// 	items: [
-		// 		{
-		// 			title: "Customers",
-		// 			url: "/sales/customers",
-		// 		},
-		// 		{
-		// 			title: "Invoices",
-		// 			url: "/sales/invoices",
-		// 		},
-		// 		{
-		// 			title: "Payments Received",
-		// 			url: "/sales/payments-received",
-		// 		},
-		// 	],
-		// },
-		// {
-		// 	title: "Purchases",
-		// 	url: "/purchases/suppliers",
-		// 	icon: ShoppingCart,
-		// 	items: [
-		// 		{
-		// 			title: "Suppliers",
-		// 			url: "/purchases/suppliers",
-		// 		},
-		// 		{
-		// 			title: "Expenses",
-		// 			url: "/purchases/expenses",
-		// 		},
-		// 	],
-		// },
-		// {
-		// 	title: "Accountant",
-		// 	url: "/accountant/manual-journal",
-		// 	icon: Calculator,
-		// 	items: [
-		// 		{
-		// 			title: "Manual Journal",
-		// 			url: "/accountant/manual-journal",
-		// 		},
-		// 		{
-		// 			title: "Chart of Accounts",
-		// 			url: "/accountant/chart-of-accounts",
-		// 		},
-		// 	],
-		// },
-		// {
-		// 	title: "Reports",
-		// 	url: "/reports",
-		// 	icon: BarChart,
-		// 	items: [
-		// 		{
-		// 			title: "Profit and Loss",
-		// 			url: "/reports/profit-and-loss",
-		// 		},
-		// 		{
-		// 			title: "Balance Sheet",
-		// 			url: "/reports/balance-sheet",
-		// 		},
-		// 	],
-		// },
-	],
-	navSecondary: [
 		{
-			title: "Support",
-			url: "#",
-			icon: LifeBuoy,
+			title: "Items",
+			url: "/items",
+			icon: Package,
 		},
 		{
-			title: "Feedback",
-			url: "#",
-			icon: Send,
+			title: "Sales",
+			url: "/sales/customers",
+			icon: IndianRupee,
+			isActive: true,
+			items: [
+				{
+					title: "Customers",
+					url: "/sales/customers",
+				},
+				{
+					title: "Invoices",
+					url: "/sales/invoices",
+				},
+				{
+					title: "Payments Received",
+					url: "/sales/payments-received",
+				},
+			],
+		},
+		{
+			title: "Purchases",
+			url: "/purchases/suppliers",
+			icon: ShoppingCart,
+			items: [
+				{
+					title: "Suppliers",
+					url: "/purchases/suppliers",
+				},
+				{
+					title: "Bills",
+					url: "/purchases/bills",
+				},
+				{
+					title: "Payments Made",
+					url: "/purchases/payment-made",
+				},
+			],
+		},
+		{
+			title: "GST",
+			url: "/gst/reconcile",
+			icon: FileText,
+		},
+		{
+			title: "Accountant",
+			url: "/accountant/manual-journal",
+			icon: Calculator,
+			items: [
+				{
+					title: "Manual Journal",
+					url: "/accountant/manual-journal",
+				},
+				{
+					title: "Chart of Accounts",
+					url: "/accountant/chart-of-accounts",
+				},
+			],
+		},
+		{
+			title: "Reports",
+			url: "/reports",
+			icon: BarChart,
+			items: [
+				{
+					title: "Profit and Loss",
+					url: "/reports/profit-and-loss",
+				},
+				{
+					title: "Balance Sheet",
+					url: "/reports/balance-sheet",
+				},
+				{
+					title: "Trial Balance",
+					url: "/reports/trial-balance",
+				},
+				{
+					title: "Net Income",
+					url: "/reports/net-income",
+				},
+				{
+					title: "Cash Flow",
+					url: "/reports/cash-flow",
+				},
+			],
 		},
 	],
+	// navSecondary: [
+	// 	{
+	// 		title: "Support",
+	// 		url: "#",
+	// 		icon: LifeBuoy,
+	// 	},
+	// 	{
+	// 		title: "Feedback",
+	// 		url: "#",
+	// 		icon: Send,
+	// 	},
+	// ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	const pathname = usePathname();
+	const isActive = (url: string) => pathname.startsWith(url);
+
+	const navMain = data.navMain.map((item) => ({
+		...item,
+		isActive: isActive(item.url),
+	}));
 	return (
 		<Sidebar {...props}>
 			<SidebarHeader className="border-b">
@@ -144,8 +174,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 				</SidebarMenu>
 			</SidebarHeader>
 			<SidebarContent>
-				<NavMain items={data.navMain} />
-				<NavSecondary items={data.navSecondary} className="mt-auto" />
+				<NavMain items={navMain} />
+				{/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
 			</SidebarContent>
 		</Sidebar>
 	);
