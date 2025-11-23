@@ -708,18 +708,20 @@ function CreateItemForm({ className, ...props }: React.ComponentProps<"form">) {
 																		</div>
 																	</SelectItem>
 																))
-															) : (
+															) : salesAccountSearch.length > 0 ? (
 																<div
 																	key="sales-no-results"
 																	className="px-2 py-1.5 text-sm text-muted-foreground text-center">
-																	{salesAccountSearch.length > 0
-																		? "No accounts found"
-																		: salesAccountsData?.data?.docs &&
-																		  salesAccountsData.data.docs.length === 0
-																		? "No accounts available"
-																		: null}
+																	No accounts found
 																</div>
-															)}
+															) : salesAccountsData?.data?.docs &&
+															  salesAccountsData.data.docs.length === 0 ? (
+																<div
+																	key="sales-no-accounts"
+																	className="px-2 py-1.5 text-sm text-muted-foreground text-center">
+																	No accounts available
+																</div>
+															) : null}
 														</div>
 													</SelectContent>
 												</Select>
@@ -869,19 +871,20 @@ function CreateItemForm({ className, ...props }: React.ComponentProps<"form">) {
 																		</SelectItem>
 																	)
 																)
-															) : (
+															) : purchaseAccountSearch.length > 0 ? (
 																<div
 																	key="purchase-no-results"
 																	className="px-2 py-1.5 text-sm text-muted-foreground text-center">
-																	{purchaseAccountSearch.length > 0
-																		? "No accounts found"
-																		: purchaseAccountsData?.data?.docs &&
-																		  purchaseAccountsData.data.docs.length ===
-																				0
-																		? "No accounts available"
-																		: null}
+																	No accounts found
 																</div>
-															)}
+															) : purchaseAccountsData?.data?.docs &&
+															  purchaseAccountsData.data.docs.length === 0 ? (
+																<div
+																	key="purchase-no-accounts"
+																	className="px-2 py-1.5 text-sm text-muted-foreground text-center">
+																	No accounts available
+																</div>
+															) : null}
 														</div>
 													</SelectContent>
 												</Select>
@@ -951,14 +954,22 @@ function CreateItemForm({ className, ...props }: React.ComponentProps<"form">) {
 														</SelectItem>
 														{vendorsData?.data?.docs &&
 														vendorsData.data.docs.length > 0 ? (
-															vendorsData.data.docs.map((vendor) => (
-																<SelectItem
-																	key={vendor._id}
-																	value={vendor._id || ""}
-																	className="pl-4">
-																	{vendor.name}
-																</SelectItem>
-															))
+															vendorsData.data.docs
+																.filter(
+																	(vendor) =>
+																		vendor._id && vendor._id.trim() !== ""
+																)
+																.map((vendor) => {
+																	const vendorId = vendor._id || "";
+																	return (
+																		<SelectItem
+																			key={vendorId}
+																			value={vendorId}
+																			className="pl-4">
+																			{vendor.name}
+																		</SelectItem>
+																	);
+																})
 														) : debouncedVendorSearch.length > 0 ? (
 															<div
 																key="no-vendors"
@@ -1133,18 +1144,20 @@ function CreateItemForm({ className, ...props }: React.ComponentProps<"form">) {
 																	</div>
 																</SelectItem>
 															))
-														) : (
+														) : inventoryAccountSearch.length > 0 ? (
 															<div
 																key="inventory-no-results"
 																className="px-2 py-1.5 text-sm text-muted-foreground text-center">
-																{inventoryAccountSearch.length > 0
-																	? "No accounts found"
-																	: inventoryAccountsData?.data?.docs &&
-																	  inventoryAccountsData.data.docs.length === 0
-																	? "No accounts available"
-																	: null}
+																No accounts found
 															</div>
-														)}
+														) : inventoryAccountsData?.data?.docs &&
+														  inventoryAccountsData.data.docs.length === 0 ? (
+															<div
+																key="inventory-no-accounts"
+																className="px-2 py-1.5 text-sm text-muted-foreground text-center">
+																No accounts available
+															</div>
+														) : null}
 													</div>
 												</SelectContent>
 											</Select>
